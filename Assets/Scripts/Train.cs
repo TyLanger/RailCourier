@@ -2,9 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Train : Car
 {
+    public event Action<int> OnThrottleChanged;
+
     public float maxAccel = 2;
     public float acceleration = 1;
     public float brakeAccel = 0f;
@@ -128,5 +131,6 @@ public class Train : Car
     void AdjustThrottle(int increment)
     {
         throttle = Mathf.Clamp(throttle + increment, -1, 2);
+        OnThrottleChanged?.Invoke(throttle);
     }
 }

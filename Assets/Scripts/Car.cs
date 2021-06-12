@@ -53,7 +53,7 @@ public class Car : MonoBehaviour
             hasBehind = true;
         }
 
-        baseColour = GetComponent<MeshRenderer>().material.color;
+        baseColour = GetComponentInChildren<MeshRenderer>().materials[0].color;
     }
 
     // Update is called once per frame
@@ -319,11 +319,11 @@ public class Car : MonoBehaviour
     {
         if(active)
         {
-            GetComponent<MeshRenderer>().material.color = highlightColour;
+            GetComponentInChildren<MeshRenderer>().materials[0].color = highlightColour;
         }
         else
         {
-            GetComponent<MeshRenderer>().material.color = baseColour;
+            GetComponentInChildren<MeshRenderer>().materials[0].color = baseColour;
         }
     }
 
@@ -331,11 +331,11 @@ public class Car : MonoBehaviour
     {
         if (active)
         {
-            GetComponent<MeshRenderer>().material.color = dangerColour;
+            GetComponentInChildren<MeshRenderer>().materials[0].color = dangerColour;
         }
         else
         {
-            GetComponent<MeshRenderer>().material.color = baseColour;
+            GetComponentInChildren<MeshRenderer>().materials[0].color = baseColour;
         }
     }
 
