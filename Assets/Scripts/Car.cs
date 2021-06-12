@@ -30,8 +30,10 @@ public class Car : MonoBehaviour
     protected Vector3 targetPoint;
     public RailPoint nextPoint;
     bool beingShoved = false;
+    bool stopped = false;
 
     public Color highlightColour;
+    public Color dangerColour;
     Color baseColour;
 
     // Start is called before the first frame update
@@ -60,8 +62,10 @@ public class Car : MonoBehaviour
 
             transform.forward = (targetPoint - transform.position).normalized;
 
-            transform.position = Vector3.MoveTowards(transform.position, targetPoint, currentSpeed * Time.fixedDeltaTime);
-
+            if (!stopped)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, targetPoint, currentSpeed * Time.fixedDeltaTime);
+            }
             if (Vector3.Distance(transform.position, targetPoint) < 0.01f)
             {
                 nextPoint = nextPoint.GetNext(this);
@@ -107,6 +111,15 @@ public class Car : MonoBehaviour
         }
     }
 
+    public void AddCurrentSpeedPropagate(float boost)
+    {
+        currentSpeed += boost;
+        if(behind && hasBehind)
+        {
+            behind.AddCurrentSpeedPropagate(boost);
+        }
+    }
+
     protected virtual void CalculateSpeed()
     {
         if (hasBehind && behind)
@@ -135,10 +148,17 @@ public class Car : MonoBehaviour
                 // if my speed is higher, I am acclerating. Let me go and don't give the car any speed
                 if (currentSpeed < carSpeed)
                 {
-                    // brake
-                    float avgSpeed = (currentSpeed + carSpeed) / 2;
-                    behind.SetSpeed(Mathf.Min(carSpeed, Mathf.Clamp(avgSpeed - 0.2f * Time.fixedDeltaTime, 0, maxSpeed))); // don't give the car any speed, only take
-                    currentSpeed = avgSpeed;
+                    if (stopped)
+                    {
+                        behind.SetSpeed(0);
+                    }
+                    else
+                    {
+                        // brake
+                        float avgSpeed = (currentSpeed + carSpeed) / 2;
+                        behind.SetSpeed(Mathf.Min(carSpeed, Mathf.Clamp(avgSpeed - 0.2f * Time.fixedDeltaTime, 0, maxSpeed))); // don't give the car any speed, only take
+                        currentSpeed = avgSpeed;
+                    }
                 }
                     // else
                     // do nothing
@@ -218,6 +238,26 @@ public class Car : MonoBehaviour
         frontCoupler.gameObject.SetActive(true);
     }
 
+    public void DetachFromFrontWait()
+    {
+        StartCoroutine(ActivateFrontCoupler());
+    }
+
+    IEnumerator ActivateFrontCoupler()
+    {
+        yield return new WaitForSeconds(0.5f);
+        frontCoupler.gameObject.SetActive(true);
+    }
+
+    public void SplitBack()
+    {
+        if (hasBehind)
+        {
+            behind.DetachFromFrontWait();
+        }
+        DetachFromBack();
+    }
+
     public void ChangeTracks(Vector3 oldPoint, RailPoint newPoint)
     {
         Decouple();
@@ -244,6 +284,30 @@ public class Car : MonoBehaviour
             yield return null;
         }
         beingShoved = false;
+        currentSpeed += 2;
+        yield return new WaitForSeconds(0.3f);
+        //Debug.Log($"Behind: {behind.name} speed: {behind.currentSpeed}");
+        //behind.currentSpeed += 4; // need 4 to get the back 2 to attach to the front
+        // might not work with 3 back cars...
+        // should I boost all back cars by 2?
+        behind.AddCurrentSpeedPropagate(2);
+    }
+
+    public void StopMoving()
+    {
+        stopped = true;
+        currentSpeed = 0;
+    }
+
+    public void ResumeMoving(bool push = false)
+    {
+        stopped = false;
+        if(push)
+        {
+            //Debug.Log($"Speed before push: {currentSpeed}");
+            //currentSpeed += 4;
+            AddCurrentSpeedPropagate(4);
+        }
     }
 
     public void Highlight(bool active)
@@ -251,6 +315,18 @@ public class Car : MonoBehaviour
         if(active)
         {
             GetComponent<MeshRenderer>().material.color = highlightColour;
+        }
+        else
+        {
+            GetComponent<MeshRenderer>().material.color = baseColour;
+        }
+    }
+
+    public void DangerHighlight(bool active)
+    {
+        if (active)
+        {
+            GetComponent<MeshRenderer>().material.color = dangerColour;
         }
         else
         {

@@ -23,7 +23,8 @@ public class RailMover : RailPoint
         {
             //Debug.Log($"Count: {cars.Count}");
             cars[0].ChangeTracks(startPoint.position, altPoint);
-            cars[0].Highlight(false);
+            Exit(cars[0]);
+
         }
     }
 
