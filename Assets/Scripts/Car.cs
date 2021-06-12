@@ -41,6 +41,7 @@ public class Car : MonoBehaviour
 
     public int crateSlots = 2;
     public Transform[] cratePoints;
+    public Crate[] crates;
     // how to tell how many are filled and which ones?
     // some struct?
 
@@ -141,6 +142,42 @@ public class Car : MonoBehaviour
         }
     }
 
+    public bool CanHoldCrate()
+    {
+        for (int i = 0; i < crates.Length; i++)
+        {
+            if (crates[i] == null)
+            {
+                return true;
+            }
+        }
+        if(hasBehind && behind != null)
+        {
+            return behind.CanHoldCrate();
+        }
+        return false;
+    }
+
+    public void PlaceCrate(Crate c)
+    {
+        for (int i = 0; i < crates.Length; i++)
+        {
+            if (crates[i] == null)
+            {
+                c.transform.position = cratePoints[i].position;
+                c.transform.parent = cratePoints[i];
+                c.transform.rotation = cratePoints[i].rotation;
+                crates[i] = c;
+                c.ActivateTrigger(false);
+                return;
+            }
+        }
+        if (hasBehind && behind != null)
+        {
+            behind.PlaceCrate(c);
+        }
+    }
+
     protected virtual void CalculateSpeed()
     {
         if (hasBehind && behind)
@@ -202,7 +239,7 @@ public class Car : MonoBehaviour
 
     protected void JetisonLast()
     {
-        if(behind)
+        if(hasBehind && behind)
         {
             behind.JetisonLast();
         }

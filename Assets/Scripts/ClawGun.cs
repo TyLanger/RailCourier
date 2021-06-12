@@ -5,7 +5,9 @@ using UnityEngine;
 public class ClawGun : MonoBehaviour
 {
     public Camera mainCam;
-    public Transform claw;
+    public Claw claw;
+    public Car train;
+
     public float clawFireSpeed = 1;
     public float clawRetractSpeed = 1;
 
@@ -13,13 +15,15 @@ public class ClawGun : MonoBehaviour
     public float clawMaxDist = 5;
 
     bool shooting = false;
+    bool crateHit = false;
 
     Vector3 eyeLookPoint;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        claw.OnHitCrate += StopClaw;
+        train = GetComponentInParent<Car>();
     }
 
     // Update is called once per frame
@@ -37,12 +41,17 @@ public class ClawGun : MonoBehaviour
                 Vector3 lookPoint = CameraRay.GetPoint(cameraDist);
                 eyeLookPoint = new Vector3(lookPoint.x, transform.position.y, lookPoint.z);
                 transform.LookAt(eyeLookPoint);
-                claw.position = transform.position + transform.forward * clawRestDist;
+                claw.transform.LookAt(eyeLookPoint);
+                claw.transform.position = transform.position + transform.forward * clawRestDist;
             }
 
             if (Input.GetButtonDown("Fire1"))
             {
-                FireClaw(eyeLookPoint);
+                // if the train can't hold any more crates, don't fire
+                if (train.CanHoldCrate())
+                {
+                    FireClaw(eyeLookPoint);
+                }
             }
         }
     }
@@ -55,33 +64,45 @@ public class ClawGun : MonoBehaviour
         StartCoroutine(ClawMove(point));
     }
 
+    void StopClaw()
+    {
+        crateHit = true;
+    }
+
     IEnumerator ClawMove(Vector3 point)
     {
-        float dist = Vector3.Distance(point, claw.position);
-        float clawReach = Vector3.Distance(claw.position, transform.position);
-        while (dist > 0.1f && clawReach < clawMaxDist)
+        crateHit = false;
+        float dist = Vector3.Distance(point, claw.transform.position);
+        float clawReach = Vector3.Distance(claw.transform.position, transform.position);
+        while (dist > 0.1f && clawReach < clawMaxDist && !crateHit)
         {
-            claw.position = Vector3.MoveTowards(claw.position, point, clawFireSpeed * Time.fixedDeltaTime);
-            dist = Vector3.Distance(point, claw.position);
-            clawReach = Vector3.Distance(claw.position, transform.position);
+            claw.transform.position = Vector3.MoveTowards(claw.transform.position, point, clawFireSpeed * Time.fixedDeltaTime);
+            dist = Vector3.Distance(point, claw.transform.position);
+            clawReach = Vector3.Distance(claw.transform.position, transform.position);
             yield return new WaitForFixedUpdate();
         }
 
         // hold position for a bit
         yield return new WaitForSeconds(0.2f);
 
-        dist = Vector3.Distance(claw.position, transform.position);
+        dist = Vector3.Distance(claw.transform.position, transform.position);
         while(dist > 0.1f)
         {
-            claw.position = Vector3.MoveTowards(claw.position, transform.position, clawRetractSpeed * Time.fixedDeltaTime);
-            dist = Vector3.Distance(transform.position, claw.position);
+            claw.transform.position = Vector3.MoveTowards(claw.transform.position, transform.position, clawRetractSpeed * Time.fixedDeltaTime);
+            dist = Vector3.Distance(transform.position, claw.transform.position);
 
             yield return new WaitForFixedUpdate();
         }
 
         // does the claw have something?
         // claw.GetItem?
-
+        if (claw.HasCrate())
+        {
+            if (train.CanHoldCrate())
+            {
+                train.PlaceCrate(claw.ReleaseCrate());
+            }
+        }
         shooting = false;
     }
 }

@@ -6,6 +6,19 @@ public class Crate : MonoBehaviour
 {
     public CrateType crateType;
 
+    public GameObject[] icons;
+
+    private void Start()
+    {
+        SetType(crateType); // update icon
+    }
+
+    public void SetType(CrateType type)
+    {
+        crateType = type;
+        icons[(int)crateType].SetActive(true);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         // did the claw grab me?
@@ -15,8 +28,8 @@ public class Crate : MonoBehaviour
             // claw touched me
             // I should have the claw do this...
             // it will know where to place the crate
-            transform.position = other.transform.position;
-            transform.parent = other.transform;
+            //transform.position = other.transform.position;
+            //transform.parent = other.transform;
         }
     }
 
@@ -26,4 +39,4 @@ public class Crate : MonoBehaviour
     }
 }
 
-public enum CrateType { Wood, Coal, Iron, Fish, Wheat, Bricks};
+public enum CrateType { Apples, Bricks, Coal, Fish, Metal, Wood };

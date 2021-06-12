@@ -432,7 +432,12 @@ MonoBehaviour:
   highlightColour: {r: 0, g: 0, b: 0, a: 0}
   dangerColour: {r: 0.99215686, g: 0.043137256, b: 0.043137256, a: 0}
   crateSlots: 2
-  cratePoints: []
+  cratePoints:
+  - {fileID: 1706089979}
+  - {fileID: 1376877390}
+  crates:
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1 &7255631679359148287
 GameObject:
   m_ObjectHideFlags: 0
