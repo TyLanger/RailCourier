@@ -36,6 +36,11 @@ public class Car : MonoBehaviour
     public Color dangerColour;
     Color baseColour;
 
+    public int crateSlots = 2;
+    public Transform[] cratePoints;
+    // how to tell how many are filled and which ones?
+    // some struct?
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
