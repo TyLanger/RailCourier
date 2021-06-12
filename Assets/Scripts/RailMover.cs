@@ -1,0 +1,35 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class RailMover : RailPoint
+{
+
+    public Transform startPoint;
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(Input.GetButtonDown("Jump"))
+        {
+            // move whatever car in the are.
+            MoveCar();
+        }
+    }
+
+    void MoveCar()
+    {
+        if(cars.Count > 0)
+        {
+            //Debug.Log($"Count: {cars.Count}");
+            cars[0].ChangeTracks(startPoint.position, altPoint);
+            cars[0].Highlight(false);
+        }
+    }
+
+    public override void Enter(Car car)
+    {
+        base.Enter(car);
+        car.Highlight(true);
+    }
+}

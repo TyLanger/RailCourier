@@ -19,25 +19,42 @@ public class Car : MonoBehaviour
     public float maxSpeed = 2;
     public float minSpeed = 1;
 
-    public Transform front; // for navigation. When there's a rail that can be followed, use that instead
+    public Car front; // for navigation. When there's a rail that can be followed, use that instead
     public Car behind;
+    public bool hasFront = false;
+    public bool hasBehind = false;
 
-    public Rail rail;
-    protected int railIndex = 0;
+    public Coupler frontCoupler;
+    public Coupler backCoupler;
+
     protected Vector3 targetPoint;
+    public RailPoint nextPoint;
+    bool beingShoved = false;
+
+    public Color highlightColour;
+    Color baseColour;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
-        
+        if(front != null)
+        {
+            hasFront = true;
+        }
+        if(behind != null)
+        {
+            hasBehind = true;
+        }
+
+        baseColour = GetComponent<MeshRenderer>().material.color;
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         CalculateSpeed();
 
-        if (rail.Ready())
+        if (!beingShoved)
         {
             CalculateTargetPoint();
 
@@ -47,7 +64,7 @@ public class Car : MonoBehaviour
 
             if (Vector3.Distance(transform.position, targetPoint) < 0.01f)
             {
-                railIndex++;
+                nextPoint = nextPoint.GetNext(this);
             }
         }
         if(currentSpeed > maxSpeed)
@@ -58,6 +75,7 @@ public class Car : MonoBehaviour
             // this is the workaround for that
             //currentSpeed = Mathf.Max(maxSpeed, currentSpeed); would keep the speed at 10 instead of 9.999901231. probably doesn't matter
         }
+        currentSpeed = Mathf.Max(0, currentSpeed - 0.1f*Time.fixedDeltaTime);
     }
 
     public void Pull(float accel)
@@ -91,7 +109,7 @@ public class Car : MonoBehaviour
 
     protected virtual void CalculateSpeed()
     {
-        if (behind)
+        if (hasBehind && behind)
         {
             float dist = Vector3.Distance(transform.position, behind.transform.position);
             distBehind = dist;
@@ -122,23 +140,123 @@ public class Car : MonoBehaviour
                     behind.SetSpeed(Mathf.Min(carSpeed, Mathf.Clamp(avgSpeed - 0.2f * Time.fixedDeltaTime, 0, maxSpeed))); // don't give the car any speed, only take
                     currentSpeed = avgSpeed;
                 }
-                else
-                {
+                    // else
                     // do nothing
                     // let me keep my speed
                     // behind car keeps its current speed
-                }
+                
 
             }
         }
-        if(front != null)
+        if(hasFront && front != null)
         {
-            distAhead = Vector3.Distance(transform.position, front.position);
+            distAhead = Vector3.Distance(transform.position, front.transform.position);
         }
     }
 
     protected void CalculateTargetPoint()
     {
-        targetPoint = rail.GetPoint(railIndex);
+        targetPoint = nextPoint.transform.position;
     }
+
+    protected void JetisonLast()
+    {
+        if(behind)
+        {
+            behind.JetisonLast();
+        }
+        else
+        {
+            Decouple();
+        }
+    }
+
+    public void Couple(Car frontCar)
+    {
+        frontCar.AttachToBack(this);
+        front = frontCar;
+        hasFront = true;
+        frontCoupler.gameObject.SetActive(false);
+    }
+
+    public void AttachToBack(Car behindCar)
+    {
+        behind = behindCar;
+        hasBehind = true;
+        backCoupler.gameObject.SetActive(false);
+    }
+
+    void Decouple()
+    {
+        front.DetachFromBack();
+        hasFront = false;
+        if(hasBehind)
+        {
+            hasBehind = false;
+            behind.DetachFromFront();
+        }
+        StartCoroutine(ActivateCouplers());
+    }
+
+    IEnumerator ActivateCouplers()
+    {
+        // wait a bit so they don't just immediately reattach
+        yield return new WaitForSeconds(3);
+        frontCoupler.gameObject.SetActive(true);
+        backCoupler.gameObject.SetActive(true);
+    }
+
+    public void DetachFromBack()
+    {
+        hasBehind = false;
+        backCoupler.gameObject.SetActive(true);
+    }
+
+    public void DetachFromFront()
+    {
+        hasFront = false;
+        frontCoupler.gameObject.SetActive(true);
+    }
+
+    public void ChangeTracks(Vector3 oldPoint, RailPoint newPoint)
+    {
+        Decouple();
+        nextPoint = newPoint;
+        //Debug.Break();
+        StartCoroutine(Shove(oldPoint, newPoint.transform.position));
+    }
+
+    IEnumerator Shove(Vector3 pivotPoint, Vector3 newPoint)
+    {
+        Vector3 ogForward = transform.forward;
+        Vector3 newForward = (newPoint - pivotPoint).normalized;
+
+        float distAlong = Vector3.Distance(pivotPoint, transform.position);
+
+        beingShoved = true;
+
+        for (int i = 0; i < 11; i++)
+        {
+            transform.forward = Vector3.Lerp(ogForward, newForward, (float)i / 10);
+            transform.position = pivotPoint + Vector3.Lerp(ogForward * distAlong, newForward * distAlong, (float)i / 10);
+            //Debug.Log($"{i} P: {transform.position} F: {transform.forward}");
+
+            yield return null;
+        }
+        beingShoved = false;
+    }
+
+    public void Highlight(bool active)
+    {
+        if(active)
+        {
+            GetComponent<MeshRenderer>().material.color = highlightColour;
+        }
+        else
+        {
+            GetComponent<MeshRenderer>().material.color = baseColour;
+        }
+    }
+
+    
 }

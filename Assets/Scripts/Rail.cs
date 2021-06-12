@@ -37,6 +37,7 @@ public class Rail : MonoBehaviour
     void PopulatePoints()
     {
         points = ellipse.GetPoints();
+        System.Array.Reverse(points);
     }
 
     public bool Ready()
