@@ -13,18 +13,48 @@ public class RailPoint : MonoBehaviour
     [SerializeField] int carsInArea = 0;
     protected List<Car> cars;
 
+    LineRenderer line;
+    LineRenderer lr2;
+
     private void Start()
     {
         cars = new List<Car>();
+        line = GetComponent<LineRenderer>();
+
+        int resolution = 2;
+
+        if(altPoint != null)
+        {
+            GameObject g = new GameObject(gameObject.name + " 2nd LR");
+            g.transform.position = transform.position;
+            g.transform.parent = transform;
+
+            lr2 = g.AddComponent<LineRenderer>();
+            lr2.textureMode = LineTextureMode.Tile;
+            lr2.material = line.material;
+            lr2.positionCount = resolution;
+            lr2.SetPosition(0, altPoint.transform.position);
+            lr2.SetPosition(1, transform.position);
+
+        }
+
+        line.positionCount = resolution;
+        line.SetPosition(0, transform.position);
+        line.SetPosition(1, nextPoint.transform.position);
+
+
     }
 
     public RailPoint GetNext(Car car)
     {
-        if(useAlt && altPoint != null)
+
+        Exit(car);
+
+        if (useAlt && altPoint != null)
         {
+            altPoint.Enter(car);
             return altPoint;
         }
-        Exit(car);
         nextPoint.Enter(car);
         return nextPoint;
     }
@@ -46,5 +76,14 @@ public class RailPoint : MonoBehaviour
 
         carsInArea--;
         cars.Remove(car);
+    }
+
+    public bool DoesCarHaveBehind()
+    {
+        if(cars.Count> 0 && cars[cars.Count-1].hasBehind)
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -7,6 +7,7 @@ public class Car : MonoBehaviour
 
     public float minDist = 1.2f; // center to center for now
     public float maxDist = 1.5f;
+    public float breakDist = 2.3f;
 
     // for debugging
     // these are different for diff cars.
@@ -32,6 +33,8 @@ public class Car : MonoBehaviour
     bool beingShoved = false;
     bool stopped = false;
 
+    public GameObject ejectIndicator;
+    public GameObject insertIndicator;
     public Color highlightColour;
     public Color dangerColour;
     Color baseColour;
@@ -54,6 +57,8 @@ public class Car : MonoBehaviour
         }
 
         baseColour = GetComponentInChildren<MeshRenderer>().materials[0].color;
+        Highlight(false);
+        DangerHighlight(false);
     }
 
     // Update is called once per frame
@@ -85,6 +90,17 @@ public class Car : MonoBehaviour
             //currentSpeed = Mathf.Max(maxSpeed, currentSpeed); would keep the speed at 10 instead of 9.999901231. probably doesn't matter
         }
         currentSpeed = Mathf.Max(0, currentSpeed - 0.1f*Time.fixedDeltaTime);
+
+        if (hasFront && front != null)
+        {
+            if (Vector3.Distance(transform.position, front.transform.position) > breakDist)
+            {
+                // break off car in front
+                // already have a method to split the behind car off. Using that
+                Debug.Log($"{gameObject.name} broke from distance to {front.name}");
+                front.SplitBack();
+            }
+        }
     }
 
     public void Pull(float accel)
@@ -245,13 +261,14 @@ public class Car : MonoBehaviour
 
     public void DetachFromFrontWait()
     {
-        StartCoroutine(ActivateFrontCoupler());
+        StartCoroutine(DetachFromFrontCR());
     }
 
-    IEnumerator ActivateFrontCoupler()
+    IEnumerator DetachFromFrontCR()
     {
         yield return new WaitForSeconds(0.5f);
-        frontCoupler.gameObject.SetActive(true);
+
+        DetachFromFront();
     }
 
     public void SplitBack()
@@ -317,6 +334,7 @@ public class Car : MonoBehaviour
 
     public void Highlight(bool active)
     {
+        ejectIndicator.SetActive(active);
         if(active)
         {
             GetComponentInChildren<MeshRenderer>().materials[0].color = highlightColour;
@@ -329,6 +347,8 @@ public class Car : MonoBehaviour
 
     public void DangerHighlight(bool active)
     {
+        insertIndicator.SetActive(active);
+
         if (active)
         {
             GetComponentInChildren<MeshRenderer>().materials[0].color = dangerColour;

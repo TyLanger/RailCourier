@@ -49,8 +49,9 @@ public class Train : Car
             //throttle = Mathf.Max(throttle - 1, -1);
             AdjustThrottle(-1);
         }
-        if(Input.GetKeyDown(KeyCode.G))
+        if(Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.X))
         {
+            Debug.Log("Jetison back");
             JetisonLast();
         }
 

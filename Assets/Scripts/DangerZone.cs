@@ -25,14 +25,16 @@ public class DangerZone : RailPoint
         car.DangerHighlight(false);
     }
 
-    public void Split()
+    public bool Split()
     {
-        Debug.Log($"Count at split: {cars.Count}");
+        //Debug.Log($"Count at split: {cars.Count}");
         //Debug.Break();
         if (cars.Count > 0)
         {
             cars[cars.Count-1].SplitBack();
+            return true;
         }
+        return false;
     }
 
 }

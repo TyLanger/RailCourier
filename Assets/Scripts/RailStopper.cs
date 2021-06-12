@@ -49,9 +49,16 @@ public class RailStopper : RailPoint
         // car.addSpeed(100)
         // backHalf.addSpeed(100)
 
-        danger.Split();
-        danger.OnAllCarsLeft += CoastClear;
-        stopper.SetStopper(true);
+        if (danger.Split())
+        {
+            danger.OnAllCarsLeft += CoastClear;
+            stopper.SetStopper(true);
+        }
+        else
+        {
+            // nothing to split
+            CoastClear();
+        }
     }
 
     void CoastClear()
