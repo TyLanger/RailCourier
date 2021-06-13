@@ -7,6 +7,8 @@ public class ClawGun : MonoBehaviour
     public Camera mainCam;
     public Claw claw;
     public ICanHoldCrate crateProcessor;
+    LineRenderer lr;
+    public float clawAnchorOffset = -0.2f;
 
     public float clawFireSpeed = 1;
     public float clawRetractSpeed = 1;
@@ -25,6 +27,15 @@ public class ClawGun : MonoBehaviour
         claw.OnHitCrate += StopClaw;
         //train = GetComponentInParent<Car>();
         crateProcessor = GetComponentInParent<ICanHoldCrate>();
+        lr = GetComponent<LineRenderer>();
+        lr.positionCount = 2;
+        lr.SetPosition(0, transform.position);
+    }
+
+    private void Update()
+    {
+        lr.SetPosition(0, transform.position);
+        lr.SetPosition(1, claw.transform.position + claw.transform.forward * clawAnchorOffset);
     }
 
     public void SetLookPoint(Vector3 lookPoint, bool cheatMode = false)

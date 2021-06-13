@@ -95,7 +95,8 @@ public class Car : MonoBehaviour, ICanHoldCrate
                 // break off car in front
                 // already have a method to split the behind car off. Using that
                 Debug.Log($"{gameObject.name} broke from distance to {front.name}");
-                front.SplitBack();
+                front.DetachFromBack();
+                DetachFromFront();
             }
         }
     }
@@ -241,6 +242,7 @@ public class Car : MonoBehaviour, ICanHoldCrate
                     currentSpeed = avgSpeed;
                 }
                 // else just started slowing down
+                
             }
             else if (dist < minDist)
             {
@@ -309,10 +311,13 @@ public class Car : MonoBehaviour, ICanHoldCrate
         backCoupler.gameObject.SetActive(false);
     }
 
-    void Decouple()
+    public void Decouple()
     {
-        front.DetachFromBack();
-        hasFront = false;
+        if (hasFront)
+        {
+            front.DetachFromBack();
+            hasFront = false;
+        }
         if(hasBehind)
         {
             hasBehind = false;

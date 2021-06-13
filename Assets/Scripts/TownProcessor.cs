@@ -44,7 +44,7 @@ public class TownProcessor : MonoBehaviour, ICanHoldCrate
         // will this work if the list is updated while the coroutine is running?
         while(crateList.Count > 0)
         {
-            Debug.Log($"Count: {crateList.Count}");
+            //Debug.Log($"Count: {crateList.Count}");
             Vector3 cratePos = crateList[0].transform.position;
 
             // what if the crate is too far away?

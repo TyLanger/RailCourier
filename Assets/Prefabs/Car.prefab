@@ -59,7 +59,7 @@ Transform:
   m_GameObject: {fileID: 1662187148}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.4, z: -0.73}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 0.5, y: 0.2, z: 0.2}
   m_Children: []
   m_Father: {fileID: 648448536634188522}
   m_RootOrder: 1
@@ -170,7 +170,7 @@ Transform:
   m_GameObject: {fileID: 1696469006}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.4, z: 0.73}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 0.5, y: 0.2, z: 0.2}
   m_Children: []
   m_Father: {fileID: 648448536634188522}
   m_RootOrder: 0
@@ -429,8 +429,6 @@ MonoBehaviour:
   nextPoint: {fileID: 0}
   ejectIndicator: {fileID: 8447404298444531069}
   insertIndicator: {fileID: 7255631679359148287}
-  highlightColour: {r: 0, g: 0, b: 0, a: 0}
-  dangerColour: {r: 0.99215686, g: 0.043137256, b: 0.043137256, a: 0}
   crateSlots: 2
   cratePoints:
   - {fileID: 1706089979}

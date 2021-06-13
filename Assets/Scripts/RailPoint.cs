@@ -50,6 +50,7 @@ public class RailPoint : MonoBehaviour
         Exit(car);
 
         // maybe trains can't use alt rails?
+        // or I get rid of the global switcher and have the forced switch to steal a car
         if(useAlt && car.GetType() == typeof(Train))
         {
             Switch();
