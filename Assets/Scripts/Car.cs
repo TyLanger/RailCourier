@@ -39,8 +39,7 @@ public class Car : MonoBehaviour, ICanHoldCrate
     public int crateSlots = 2;
     public Transform[] cratePoints;
     public Crate[] crates;
-    // how to tell how many are filled and which ones?
-    // some struct?
+
 
     // Start is called before the first frame update
     protected virtual void Start()
@@ -399,7 +398,10 @@ public class Car : MonoBehaviour, ICanHoldCrate
         //behind.currentSpeed += 4; // need 4 to get the back 2 to attach to the front
         // might not work with 3 back cars...
         // should I boost all back cars by 2?
-        behind.AddCurrentSpeedPropagate(2);
+        if (behind)
+        {
+            behind.AddCurrentSpeedPropagate(2);
+        }
     }
 
     public void StopMoving()
@@ -415,7 +417,7 @@ public class Car : MonoBehaviour, ICanHoldCrate
         {
             //Debug.Log($"Speed before push: {currentSpeed}");
             //currentSpeed += 4;
-            AddCurrentSpeedPropagate(4);
+            AddCurrentSpeedPropagate(5);
         }
     }
 

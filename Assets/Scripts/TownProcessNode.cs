@@ -30,7 +30,7 @@ public class TownProcessNode : RailPoint
     {
         if(cars != null && cars.Count > 0)
         {
-            cars[0].AddCurrentSpeedPropagate(2);
+            cars[0].AddCurrentSpeedPropagate(4);
         }
     }
 }

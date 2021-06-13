@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class Train : Car
 {
@@ -30,10 +29,15 @@ public class Train : Car
     public ClawGun gun;
     Vector3 eyeLookPoint;
 
+    public ParticleSystem smoke;
+    public ParticleSystem[] sparks;
+    bool sparksOn = false;
+
     // Start is called before the first frame update
     protected override void Start()
     {
         base.Start();
+        StartCoroutine(AdjustSmoke(2));
         SetMaxSpeedPropagate(throttle2Speed);
     }
 
@@ -80,6 +84,10 @@ public class Train : Car
                 gun.FireClaw(eyeLookPoint);
             }
         }
+
+       
+
+        CheckSparks();
     }
 
     // Update is called once per frame
@@ -154,9 +162,95 @@ public class Train : Car
         return current;
     }
 
+    IEnumerator AdjustSmoke(float newRate, float sustainTime = 1)
+    {
+        ParticleSystem.EmissionModule emission = smoke.emission;
+        emission.rateOverTime = new ParticleSystem.MinMaxCurve(newRate);
+
+        yield return new WaitForSeconds(sustainTime);
+
+        //ParticleSystem.EmissionModule emission2 = smoke.emission;
+        emission.rateOverTime = new ParticleSystem.MinMaxCurve((throttle*2) +1);
+    }
+
+    void StartSparks()
+    {
+        // sparks on
+        if (!sparksOn)
+        {
+            for (int i = 0; i < sparks.Length; i++)
+            {
+                sparks[i].Play();
+            }
+            sparksOn = true;
+        }
+    }
+
+    void StopSparks()
+    {
+        if (sparksOn)
+        {
+            for (int i = 0; i < sparks.Length; i++)
+            {
+                sparks[i].Stop();
+            }
+            sparksOn = false;
+        }
+    }
+
+    void CheckSparks()
+    {
+        if(sparksOn)
+        {
+            switch(throttle)
+            {
+                case 0:
+                    if(currentSpeed < 0.2f)
+                    {
+                        StopSparks();
+                    }
+                    break;
+
+                case 1:
+                    if(currentSpeed < (throttle1Speed + 0.1f))
+                    {
+                        StopSparks();
+                    }
+                    break;
+                case 2:
+                    StopSparks();
+                    break;
+            }
+        }
+
+    }
+
     void AdjustThrottle(int increment)
     {
-        throttle = Mathf.Clamp(throttle + increment, -1, 2);
+        float smokeRate = 1;
+        float sustainTime = 0;
+
+        if (throttle == 0 && increment == 1)
+        {
+
+            smokeRate = 10;
+            sustainTime = 2;
+        }
+        else if(throttle == 1 && increment == 1)
+        {
+
+            smokeRate = 20;
+            sustainTime = 2;
+        }
+
+        StartCoroutine(AdjustSmoke(smokeRate, sustainTime));
+
+        if(increment < 0)
+        {
+            StartSparks();
+        }
+
+        throttle = Mathf.Clamp(throttle + increment, 0, 2);
         OnThrottleChanged?.Invoke(throttle);
     }
 }
