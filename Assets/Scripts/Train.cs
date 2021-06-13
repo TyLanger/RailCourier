@@ -59,8 +59,8 @@ public class Train : Car
         }
         if(Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.X))
         {
-            Debug.Log("Jetison back");
-            JetisonLast();
+            //Debug.Log("Jetison back");
+            //JetisonLast();
         }
 
         Ray CameraRay = mainCam.ScreenPointToRay(Input.mousePosition);

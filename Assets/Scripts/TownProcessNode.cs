@@ -23,7 +23,16 @@ public class TownProcessNode : RailPoint
         // if it goes negative, it will get clamped to 0 eventually.
         // will have 1 frame where it moves backwards...
         car.AddCurrentSpeedPropagate(-1);
-        OnCarEntered?.Invoke(car);
+        if(OnCarEntered != null)
+        {
+            OnCarEntered?.Invoke(car);
+
+        }
+        else
+        {
+            // do this when the towns don't exist yet
+            PushCarAway();
+        }
     }
 
     public void PushCarAway()

@@ -10,12 +10,16 @@ public class RailStopper : RailPoint
     public RailStopper stopper;
     public DangerZone danger;
 
+    public GameObject space;
+
     private void Update()
     {
         if (takeInput)
         {
             if (Input.GetButtonDown("Jump"))
             {
+                if(space)
+                    space.SetActive(false);
                 if (cars.Count > 0)
                 {
                     InjectCar();
@@ -28,6 +32,11 @@ public class RailStopper : RailPoint
     {
         if (active)
         {
+            if(takeInput)
+            {
+                if(space)
+                    space.SetActive(true);
+            }
             car.StopMoving();
         }
         base.Enter(car);
