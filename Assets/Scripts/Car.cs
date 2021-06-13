@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Car : MonoBehaviour
+public class Car : MonoBehaviour, ICanHoldCrate
 {
 
     public float minDist = 1.2f; // center to center for now
@@ -35,9 +35,6 @@ public class Car : MonoBehaviour
 
     public GameObject ejectIndicator;
     public GameObject insertIndicator;
-    public Color highlightColour;
-    public Color dangerColour;
-    Color baseColour;
 
     public int crateSlots = 2;
     public Transform[] cratePoints;
@@ -57,7 +54,6 @@ public class Car : MonoBehaviour
             hasBehind = true;
         }
 
-        baseColour = GetComponentInChildren<MeshRenderer>().materials[0].color;
         Highlight(false);
         DangerHighlight(false);
     }
@@ -175,6 +171,55 @@ public class Car : MonoBehaviour
         if (hasBehind && behind != null)
         {
             behind.PlaceCrate(c);
+        }
+    }
+
+    public List<Crate> GetAllCrates(List<Crate> current)
+    {
+        if(crates != null && crates.Length > 0)
+        {
+            for (int i = 0; i < crates.Length; i++)
+            {
+                if (crates[i] != null)
+                {
+                    current.Add(crates[i]);
+                }
+            }
+        }
+        if(hasBehind && behind)
+        {
+            return behind.GetAllCrates(current);
+        }
+        return current;
+    }
+
+    public List<Crate> GetLocalCrates()
+    {
+        List<Crate> local = new List<Crate>();
+        if (crates != null && crates.Length > 0)
+        {
+            for (int i = 0; i < crates.Length; i++)
+            {
+                if (crates[i] != null)
+                {
+                    local.Add(crates[i]);
+                }
+            }
+        }
+        return local;
+    }
+
+    public void ActivateLocalCrates()
+    {
+        if (crates != null && crates.Length > 0)
+        {
+            for (int i = 0; i < crates.Length; i++)
+            {
+                if (crates[i] != null)
+                {
+                    crates[i].ActivateTrigger(true);
+                }
+            }
         }
     }
 
@@ -371,29 +416,15 @@ public class Car : MonoBehaviour
 
     public void Highlight(bool active)
     {
-        ejectIndicator.SetActive(active);
-        if(active)
+        if (ejectIndicator)
         {
-            GetComponentInChildren<MeshRenderer>().materials[0].color = highlightColour;
-        }
-        else
-        {
-            GetComponentInChildren<MeshRenderer>().materials[0].color = baseColour;
+            ejectIndicator.SetActive(active);
         }
     }
 
     public void DangerHighlight(bool active)
     {
         insertIndicator.SetActive(active);
-
-        if (active)
-        {
-            GetComponentInChildren<MeshRenderer>().materials[0].color = dangerColour;
-        }
-        else
-        {
-            GetComponentInChildren<MeshRenderer>().materials[0].color = baseColour;
-        }
     }
 
     

@@ -47,9 +47,13 @@ public class RailPoint : MonoBehaviour
 
     public RailPoint GetNext(Car car)
     {
-
         Exit(car);
 
+        // maybe trains can't use alt rails?
+        if(useAlt && car.GetType() == typeof(Train))
+        {
+            Switch();
+        }
         if (useAlt && altPoint != null)
         {
             altPoint.Enter(car);

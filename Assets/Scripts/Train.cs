@@ -26,6 +26,10 @@ public class Train : Car
     //int railIndex = 0;
     //Vector3 targetPoint;
 
+    public Camera mainCam;
+    public ClawGun gun;
+    Vector3 eyeLookPoint;
+
     // Start is called before the first frame update
     protected override void Start()
     {
@@ -55,6 +59,27 @@ public class Train : Car
             JetisonLast();
         }
 
+        Ray CameraRay = mainCam.ScreenPointToRay(Input.mousePosition);
+        Plane eyePlane = new Plane(Vector3.up, Vector3.zero);
+
+        if (eyePlane.Raycast(CameraRay, out float cameraDist))
+        {
+            Vector3 lookPoint = CameraRay.GetPoint(cameraDist);
+            eyeLookPoint = new Vector3(lookPoint.x, gun.transform.position.y, lookPoint.z);
+
+            /*transform.LookAt(eyeLookPoint);
+            claw.transform.LookAt(eyeLookPoint);
+            claw.transform.position = transform.position + transform.forward * clawRestDist;*/
+            gun.SetLookPoint(eyeLookPoint);
+        }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            if (CanHoldCrate())
+            {
+                gun.FireClaw(eyeLookPoint);
+            }
+        }
     }
 
     // Update is called once per frame

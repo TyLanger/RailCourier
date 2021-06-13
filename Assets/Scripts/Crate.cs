@@ -22,7 +22,7 @@ public class Crate : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         // did the claw grab me?
-        Debug.Log("Something touched me");
+        //Debug.Log("Something touched me");
         if(other.CompareTag("Claw"))
         {
             // claw touched me

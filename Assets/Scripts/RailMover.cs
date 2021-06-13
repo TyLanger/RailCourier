@@ -21,6 +21,10 @@ public class RailMover : RailPoint
     {
         if(cars.Count > 0)
         {
+            // trains can't use this
+            if (cars[0].GetType() == typeof(Train))
+                return;
+
             //Debug.Log($"Count: {cars.Count}");
             cars[0].ChangeTracks(startPoint.position, altPoint);
             Exit(cars[0]);

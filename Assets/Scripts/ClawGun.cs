@@ -6,7 +6,7 @@ public class ClawGun : MonoBehaviour
 {
     public Camera mainCam;
     public Claw claw;
-    public Car train;
+    public ICanHoldCrate crateProcessor;
 
     public float clawFireSpeed = 1;
     public float clawRetractSpeed = 1;
@@ -23,50 +23,43 @@ public class ClawGun : MonoBehaviour
     void Start()
     {
         claw.OnHitCrate += StopClaw;
-        train = GetComponentInParent<Car>();
+        //train = GetComponentInParent<Car>();
+        crateProcessor = GetComponentInParent<ICanHoldCrate>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetLookPoint(Vector3 lookPoint, bool cheatMode = false)
     {
-        if (!shooting)
+        // cheatmode lets it track while moving. For the town to use so they don't miss
+        if (!shooting || cheatMode)
         {
-            // look at mouse
-            Ray CameraRay = mainCam.ScreenPointToRay(Input.mousePosition);
-            Plane eyePlane = new Plane(Vector3.up, Vector3.zero);
-
-
-            if (eyePlane.Raycast(CameraRay, out float cameraDist))
+            transform.LookAt(lookPoint);
+            claw.transform.LookAt(lookPoint);
+            if (!shooting)
             {
-                Vector3 lookPoint = CameraRay.GetPoint(cameraDist);
-                eyeLookPoint = new Vector3(lookPoint.x, transform.position.y, lookPoint.z);
-                transform.LookAt(eyeLookPoint);
-                claw.transform.LookAt(eyeLookPoint);
                 claw.transform.position = transform.position + transform.forward * clawRestDist;
-            }
-
-            if (Input.GetButtonDown("Fire1"))
-            {
-                // if the train can't hold any more crates, don't fire
-                if (train.CanHoldCrate())
-                {
-                    FireClaw(eyeLookPoint);
-                }
             }
         }
     }
 
-    void FireClaw(Vector3 point)
+    public void FireClaw(Vector3 point)
     {
-        // start moving towards the point
-        // when you get there, move back
-        shooting = true;
-        StartCoroutine(ClawMove(point));
+        if (!shooting)
+        {
+            // start moving towards the point
+            // when you get there, move back
+            shooting = true;
+            StartCoroutine(ClawMove(point));
+        }
     }
 
     void StopClaw()
     {
         crateHit = true;
+    }
+
+    public bool IsShooting()
+    {
+        return shooting;
     }
 
     IEnumerator ClawMove(Vector3 point)
@@ -98,9 +91,9 @@ public class ClawGun : MonoBehaviour
         // claw.GetItem?
         if (claw.HasCrate())
         {
-            if (train.CanHoldCrate())
+            if (crateProcessor.CanHoldCrate())
             {
-                train.PlaceCrate(claw.ReleaseCrate());
+                crateProcessor.PlaceCrate(claw.ReleaseCrate());
             }
         }
         shooting = false;
